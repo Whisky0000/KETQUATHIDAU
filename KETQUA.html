@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cầu Lông Betting Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tool Đặt Cược Trận Đấu Cầu Lông</h1>
+    <form id="matchForm">
+        <h3>Thông Tin Trận Đấu</h3>
+        <input type="text" id="team1Player1" placeholder="Tên người 1 Đội 1" required>
+        <input type="text" id="team1Player2" placeholder="Tên người 2 Đội 1" required>
+        <input type="text" id="team2Player1" placeholder="Tên người 1 Đội 2" required>
+        <input type="text" id="team2Player2" placeholder="Tên người 2 Đội 2" required>
+        <label for="betAmount">Số tiền cược:</label>
+        <select id="betAmount" required>
+            <option value="">Chọn số tiền cược</option>
+            <option value="10000">10,000 VNĐ</option>
+            <option value="20000">20,000 VNĐ</option>
+            <option value="30000">30,000 VNĐ</option>
+            <option value="40000">40,000 VNĐ</option>
+            <option value="50000">50,000 VNĐ</option>
+        </select>
+        <select id="winner" required>
+            <option value="">Chọn đội thắng</option>
+            <option value="team1">Đội 1</option>
+            <option value="team2">Đội 2</option>
+        </select>
+        <button type="submit">Thêm Trận Đấu</button>
+    </form>
+
+    <h3>Lịch Sử Các Trận Đấu</h3>
+    <table id="historyTable">
+        <thead>
+            <tr>
+                <th>Đội Thắng</th>
+                <th>Đội Thua</th>
+                <th>Số Tiền Cược</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <h3>Tổng Kết Cược Từng Người</h3>
+    <table id="playerTable">
+        <thead>
+            <tr>
+                <th>Tên Người Chơi</th>
+                <th>Tổng Tiền Thắng</th>
+                <th>Tổng Tiền Thua</th>
+                <th>Số Tiền Thực Tế Nhận Được</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <h3>Tổng Số Tiền Thắng và Thua Của Tất Cả Người Chơi</h3>
+    <table id="totalTable">
+        <thead>
+            <tr>
+                <th>Tổng Tiền Thắng</th>
+                <th>Tổng Tiền Thua</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td id="totalWins">0</td>
+                <td id="totalLosses">0</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <script>
+        const matchForm = document.getElementById('matchForm');
+        const historyTable = document.getElementById('historyTable').getElementsByTagName('tbody')[0];
+        const playerTable = document.getElementById('playerTable').getElementsByTagName('tbody')[0];
+        const totalWinsCell = document.getElementById('totalWins');
+        const totalLossesCell = document.getElementById('totalLosses');
+
+        const playerStats = {};
+        let totalWins = 0;
+        let totalLosses = 0;
+
+        matchForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const team1Player1 = document.getElementById('team1Player1').value;
+            const team1Player2 = document.getElementById('team1Player2').value;
+            const team2Player1 = document.getElementById('team2Player1').value;
+            const team2Player2 = document.getElementById('team2Player2').value;
+            const betAmount = parseInt(document.getElementById('betAmount').value);
+            const winner = document.getElementById('winner').value;
+            
+            const winners = winner === 'team1' ? [team1Player1, team1Player2] : [team2Player1, team2Player2];
+            const losers = winner === 'team1' ? [team2Player1, team2Player2] : [team1Player1, team1Player2];
+
+            // Thêm vào lịch sử trận đấu
+            const historyRow = historyTable.insertRow();
+            historyRow.insertCell(0).innerText = winners.join(", "); // Đội thắng
+            historyRow.insertCell(1).innerText = losers.join(", "); // Đội thua
+            historyRow.insertCell(2).innerText = betAmount;
+
+            // Cập nhật thông tin người chơi
+            winners.forEach(player => {
+                playerStats[player] = playerStats[player] || { wins: 0, losses: 0 };
+                playerStats[player].wins += betAmount; // Tiền thắng
+            });
+
+            losers.forEach(player => {
+                playerStats[player] = playerStats[player] || { wins: 0, losses: 0 };
+                playerStats[player].losses += betAmount; // Tiền thua
+            });
+
+            // Cập nhật tổng tiền thắng và thua
+            totalWins += winners.length * betAmount; // Tổng tiền thắng
+            totalLosses += losers.length * betAmount; // Tổng tiền thua
+            totalWinsCell.innerText = totalWins;
+            totalLossesCell.innerText = totalLosses;
+
+            updatePlayerTable();
+            matchForm.reset();
+        });
+
+        function updatePlayerTable() {
+            playerTable.innerHTML = '';
+            for (const player in playerStats) {
+                const row = playerTable.insertRow();
+                row.insertCell(0).innerText = player;
+                row.insertCell(1).innerText = playerStats[player].wins;
+                row.insertCell(2).innerText = playerStats[player].losses;
+                row.insertCell(3).innerText = playerStats[player].wins - playerStats[player].losses; // Số tiền thực tế nhận được
+            }
+        }
+    </script>
+</body>
+</html>
