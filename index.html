@@ -35,6 +35,12 @@
         .ranking {
             background-color: yellow;
         }
+        .toggle-button {
+            margin-bottom: 10px;
+            cursor: pointer;
+            color: blue;
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -62,7 +68,10 @@
         <button type="submit">Thêm Trận Đấu</button>
     </form>
 
-    <h3>Lịch Sử Các Trận Đấu</h3>
+    <h3>
+        Lịch Sử Các Trận Đấu
+        <span class="toggle-button" onclick="toggleVisibility('historyTable')">Ẩn/Hiện</span>
+    </h3>
     <table id="historyTable">
         <thead>
             <tr>
@@ -77,7 +86,10 @@
         </tbody>
     </table>
 
-    <h3>Tổng Kết Cược Từng Người</h3>
+    <h3>
+        Tổng Kết Cược Từng Người
+        <span class="toggle-button" onclick="toggleVisibility('playerTable')">Ẩn/Hiện</span>
+    </h3>
     <table id="playerTable">
         <thead>
             <tr>
@@ -87,6 +99,7 @@
                 <th>Tổng Tiền Thua</th>
                 <th>Số Trận Thắng</th>
                 <th>Số Trận Thua</th>
+                <th>Tổng Số Trận Đấu</th>
                 <th>Số Tiền Thực Tế Nhận Được</th>
             </tr>
         </thead>
@@ -94,7 +107,10 @@
         </tbody>
     </table>
 
-    <h3>Bảng Xếp Hạng Người Chơi</h3>
+    <h3>
+        Bảng Xếp Hạng Người Chơi
+        <span class="toggle-button" onclick="toggleVisibility('rankingTable')">Ẩn/Hiện</span>
+    </h3>
     <table id="rankingTable" class="ranking">
         <thead>
             <tr>
@@ -150,15 +166,17 @@
 
             // Cập nhật thông tin người chơi
             winners.forEach(player => {
-                playerStats[player] = playerStats[player] || { wins: 0, losses: 0, matchesWon: 0, matchesLost: 0 };
+                playerStats[player] = playerStats[player] || { wins: 0, losses: 0, matchesWon: 0, matchesLost: 0, totalMatches: 0 };
                 playerStats[player].wins += betAmount; // Tiền thắng
                 playerStats[player].matchesWon += 1; // Số trận thắng
+                playerStats[player].totalMatches += 1; // Tổng số trận đấu
             });
 
             losers.forEach(player => {
-                playerStats[player] = playerStats[player] || { wins: 0, losses: 0, matchesWon: 0, matchesLost: 0 };
+                playerStats[player] = playerStats[player] || { wins: 0, losses: 0, matchesWon: 0, matchesLost: 0, totalMatches: 0 };
                 playerStats[player].losses += betAmount; // Tiền thua
                 playerStats[player].matchesLost += 1; // Số trận thua
+                playerStats[player].totalMatches += 1; // Tổng số trận đấu
             });
 
             updatePlayerTable();
@@ -168,17 +186,20 @@
 
         function updatePlayerTable() {
             playerTable.innerHTML = '';
+            const sortedPlayers = Object.entries(playerStats).sort((a, b) => b[1].totalMatches - a[1].totalMatches); // Sắp xếp theo tổng số trận đấu
+            
             let index = 1;
-            for (const player in playerStats) {
+            sortedPlayers.forEach(([player, stats]) => {
                 const row = playerTable.insertRow();
                 row.insertCell(0).innerText = index++; // Số thứ tự
                 row.insertCell(1).innerText = player; // Tên người chơi
-                row.insertCell(2).innerText = playerStats[player].wins; // Tổng tiền thắng
-                row.insertCell(3).innerText = playerStats[player].losses; // Tổng tiền thua
-                row.insertCell(4).innerText = playerStats[player].matchesWon; // Số trận thắng
-                row.insertCell(5).innerText = playerStats[player].matchesLost; // Số trận thua
-                row.insertCell(6).innerText = playerStats[player].wins - playerStats[player].losses; // Số tiền thực tế nhận được
-            }
+                row.insertCell(2).innerText = stats.wins; // Tổng tiền thắng
+                row.insertCell(3).innerText = stats.losses; // Tổng tiền thua
+                row.insertCell(4).innerText = stats.matchesWon; // Số trận thắng
+                row.insertCell(5).innerText = stats.matchesLost; // Số trận thua
+                row.insertCell(6).innerText = stats.totalMatches; // Tổng số trận đấu
+                row.insertCell(7).innerText = stats.wins - stats.losses; // Số tiền thực tế nhận được
+            });
         }
 
         function updateRankingTable() {
@@ -199,6 +220,11 @@
                 row.insertCell(1).innerText = player; // Tên người chơi
                 row.insertCell(2).innerText = netAmount; // Số tiền thực tế nhận được
             });
+        }
+
+        function toggleVisibility(tableId) {
+            const table = document.getElementById(tableId);
+            table.style.display = table.style.display === 'none' ? '' : 'none';
         }
     </script>
 </body>
