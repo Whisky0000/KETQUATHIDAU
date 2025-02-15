@@ -25,13 +25,6 @@
         th {
             background-color: #f2f2f2;
         }
-        .delete-button {
-            background-color: red;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-        }
         .ranking {
             background-color: yellow;
         }
@@ -79,7 +72,6 @@
                 <th>Đội Thắng</th>
                 <th>Đội Thua</th>
                 <th>Số Tiền Cược</th>
-                <th>Hành Động</th>
             </tr>
         </thead>
         <tbody>
@@ -130,6 +122,7 @@
         const playerTable = document.getElementById('playerTable').getElementsByTagName('tbody')[0];
 
         const playerStats = {};
+        let matches = [];
         let matchCount = 0;
 
         matchForm.addEventListener('submit', function(event) {
@@ -147,23 +140,9 @@
 
             // Thêm vào lịch sử trận đấu
             matchCount++;
-            const historyRow = historyTable.insertRow();
-            historyRow.insertCell(0).innerText = matchCount; // Số thứ tự
-            historyRow.insertCell(1).innerText = winners.join(", "); // Đội thắng
-            historyRow.insertCell(2).innerText = losers.join(", "); // Đội thua
-            historyRow.insertCell(3).innerText = betAmount; // Số tiền cược
-
-            // Thêm nút xóa
-            const deleteButton = document.createElement("button");
-            deleteButton.innerText = "Xóa";
-            deleteButton.className = "delete-button";
-            deleteButton.onclick = function() {
-                historyTable.deleteRow(historyRow.rowIndex - 1); // Xóa hàng
-                updatePlayerTable(); // Cập nhật bảng người chơi
-                updateRankingTable(); // Cập nhật bảng xếp hạng
-            };
-            historyRow.insertCell(4).appendChild(deleteButton); // Thêm nút vào cột hành động
-
+            matches.push({ matchCount, winners, losers, betAmount });
+            updateHistoryTable();
+            
             // Cập nhật thông tin người chơi
             winners.forEach(player => {
                 playerStats[player] = playerStats[player] || { wins: 0, losses: 0, matchesWon: 0, matchesLost: 0, totalMatches: 0 };
@@ -183,6 +162,17 @@
             updateRankingTable();
             matchForm.reset();
         });
+
+        function updateHistoryTable() {
+            historyTable.innerHTML = '';
+            matches.forEach(match => {
+                const historyRow = historyTable.insertRow();
+                historyRow.insertCell(0).innerText = match.matchCount; // Số thứ tự
+                historyRow.insertCell(1).innerText = match.winners.join(", "); // Đội thắng
+                historyRow.insertCell(2).innerText = match.losers.join(", "); // Đội thua
+                historyRow.insertCell(3).innerText = match.betAmount; // Số tiền cược
+            });
+        }
 
         function updatePlayerTable() {
             playerTable.innerHTML = '';
