@@ -6,42 +6,116 @@
     <title>Cầu Lông Betting Tool</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f4f8; /* Màu nền nhẹ nhàng hơn */
+            margin: 0;
             padding: 20px;
-            border: 1px solid #ccc;
+        }
+        h1 {
+            text-align: center;
+            color: #ff9800; /* Màu cam */
+            margin-bottom: 20px;
+            font-size: 2.5em; /* Kích thước tiêu đề lớn hơn */
+        }
+        form {
+            background-color: #ffffff; /* Màu nền trắng cho form */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        input, select, button {
+            width: calc(100% - 20px);
+            padding: 12px;
+            margin: 5px 0;
+            border: 1px solid #ccc; /* Màu viền nhẹ */
             border-radius: 5px;
+            transition: border 0.3s;
+            font-size: 1em; /* Kích thước chữ */
+        }
+        input:focus, select:focus {
+            border-color: #ff9800; /* Màu viền cam khi focus */
+            outline: none;
+        }
+        button {
+            background-color: #ffb74d; /* Màu vàng cam */
+            color: black;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+            font-size: 1em; /* Kích thước chữ */
+        }
+        button:hover {
+            background-color: #ffa726; /* Màu vàng cam đậm khi hover */
         }
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
+            background-color: #ffffff; /* Màu nền trắng cho bảng */
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         }
         th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
+            padding: 15px;
             text-align: center;
+            border-bottom: 1px solid #ddd;
         }
         th {
-            background-color: #f2f2f2;
+            background-color: #ff9800; /* Màu cam cho tiêu đề */
+            color: white;
+            font-weight: bold; /* Làm đậm chữ tiêu đề */
         }
-        .ranking {
-            background-color: yellow;
+        tr:nth-child(even) {
+            background-color: #f9f9f9; /* Màu nền nhẹ cho hàng chẵn */
+        }
+        tr:hover {
+            background-color: #ffe0b2; /* Màu nền khi hover */
+        }
+        .winner {
+            background-color: #ffeb3b; /* Màu vàng nhạt cho người thắng */
+            color: black; /* Màu chữ đen cho người thắng */
+        }
+        .loser {
+            background-color: #ffccbc; /* Màu đỏ nhạt cho người thua */
+            color: black; /* Màu chữ đen cho người thua */
         }
         .toggle-button {
-            margin-bottom: 10px;
             cursor: pointer;
-            color: blue;
+            color: #ff9800; /* Màu cam */
             text-decoration: underline;
+            float: right;
+            font-size: 0.9em; /* Kích thước chữ nhỏ hơn */
+        }
+        .toggle-button:hover {
+            color: #e65100; /* Màu cam đậm khi hover */
+        }
+        .icon {
+            margin-right: 5px;
+        }
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            input, select, button {
+                width: 100%;
+            }
+            h3 {
+                font-size: 1.5em; /* Kích thước tiêu đề nhỏ hơn trên điện thoại */
+            }
         }
     </style>
 </head>
 <body>
-    <h1>BẢNG KẾT QUẢ</h1>
+    <h1>BẢNG KẾT QUẢ CẦU LÔNG</h1>
     <form id="matchForm">
         <h3>Nhập Tên Người Chơi</h3>
+        <h4>Đội 1</h4>
         <input type="text" id="team1Player1" placeholder="Tên người 1 Đội 1" required>
         <input type="text" id="team1Player2" placeholder="Tên người 2 Đội 1 (tuỳ chọn)">
+        <h4>Đội 2</h4>
         <input type="text" id="team2Player1" placeholder="Tên người 1 Đội 2" required>
         <input type="text" id="team2Player2" placeholder="Tên người 2 Đội 2 (tuỳ chọn)">
         <label for="betAmount">Số tiền cược:</label>
@@ -69,8 +143,8 @@
         <thead>
             <tr>
                 <th>Số Thứ Tự</th>
+                <th>Danh Sách Trận Đấu</th>
                 <th>Đội Thắng</th>
-                <th>Đội Thua</th>
                 <th>Số Tiền Cược</th>
             </tr>
         </thead>
@@ -87,8 +161,6 @@
             <tr>
                 <th>Số Thứ Tự</th>
                 <th>Tên Người Chơi</th>
-                <th>Tổng Tiền Thắng</th>
-                <th>Tổng Tiền Thua</th>
                 <th>Số Trận Thắng</th>
                 <th>Số Trận Thua</th>
                 <th>Tổng Số Trận Đấu</th>
@@ -140,7 +212,18 @@
 
             // Thêm vào lịch sử trận đấu
             matchCount++;
-            matches.push({ matchCount, winners, losers, betAmount });
+            let matchDetails = '';
+            if (team1Player2) {
+                matchDetails = `${team1Player1}, ${team1Player2} vs ${team2Player1}, ${team2Player2}`;
+            } else {
+                matchDetails = `${team1Player1} vs ${team2Player1}`;
+            }
+            matches.push({
+                matchCount,
+                matchDetails,
+                winner: winners.join(", "),
+                betAmount
+            });
             updateHistoryTable();
             
             // Cập nhật thông tin người chơi
@@ -172,8 +255,8 @@
             matches.forEach(match => {
                 const historyRow = historyTable.insertRow();
                 historyRow.insertCell(0).innerText = match.matchCount; // Số thứ tự
-                historyRow.insertCell(1).innerText = match.winners.join(", "); // Đội thắng
-                historyRow.insertCell(2).innerText = match.losers.join(", "); // Đội thua
+                historyRow.insertCell(1).innerText = match.matchDetails; // Danh sách trận đấu
+                historyRow.insertCell(2).innerText = match.winner; // Tên người chơi của đội thắng
                 historyRow.insertCell(3).innerText = match.betAmount; // Số tiền cược
             });
         }
@@ -185,14 +268,12 @@
             let index = 1;
             sortedPlayers.forEach(([player, stats]) => {
                 const row = playerTable.insertRow();
-                row.insertCell(0).innerText = index++; // Số thứ tự
+                row.insertCell(0).innerHTML = `<span class="icon">🏅</span>${index++}`; // Biểu tượng bên cạnh số thứ tự
                 row.insertCell(1).innerText = player; // Tên người chơi
-                row.insertCell(2).innerText = stats.wins; // Tổng tiền thắng
-                row.insertCell(3).innerText = stats.losses; // Tổng tiền thua
-                row.insertCell(4).innerText = stats.matchesWon; // Số trận thắng
-                row.insertCell(5).innerText = stats.matchesLost; // Số trận thua
-                row.insertCell(6).innerText = stats.totalMatches; // Tổng số trận đấu
-                row.insertCell(7).innerText = stats.wins - stats.losses; // Số tiền thực tế nhận được
+                row.insertCell(2).innerText = stats.matchesWon; // Số trận thắng
+                row.insertCell(3).innerText = stats.matchesLost; // Số trận thua
+                row.insertCell(4).innerText = stats.totalMatches; // Tổng số trận đấu
+                row.insertCell(5).innerText = stats.wins - stats.losses; // Số tiền thực tế nhận được
             });
         }
 
@@ -210,9 +291,16 @@
             let index = 1;
             rankingData.forEach(({ player, netAmount }) => {
                 const row = rankingTable.insertRow();
-                row.insertCell(0).innerText = index++; // Số thứ tự
+                row.insertCell(0).innerHTML = `<span class="icon">🏆</span>${index++}`; // Biểu tượng bên cạnh số thứ tự
                 row.insertCell(1).innerText = player; // Tên người chơi
                 row.insertCell(2).innerText = netAmount; // Số tiền thực tế nhận được
+
+                // Phân chia màu sắc cho người thắng và thua
+                if (netAmount > 0) {
+                    row.classList.add('winner');
+                } else {
+                    row.classList.add('loser');
+                }
             });
         }
 
