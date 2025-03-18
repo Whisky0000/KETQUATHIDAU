@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #f0f4f8; /* Màu nền nhẹ nhàng hơn */
+            background-color: #f0f4f8; /* Màu nền nhẹ nhàng */
             margin: 0;
             padding: 20px;
         }
@@ -25,7 +25,7 @@
             margin-bottom: 20px;
         }
         input, select, button {
-            width: calc(100% - 20px);
+            width: 100%; /* Chiếm toàn bộ chiều rộng */
             padding: 12px;
             margin: 5px 0;
             border: 1px solid #ccc; /* Màu viền nhẹ */
@@ -99,11 +99,17 @@
             body {
                 padding: 10px;
             }
+            h1 {
+                font-size: 1.8em; /* Kích thước tiêu đề nhỏ hơn trên điện thoại */
+            }
             input, select, button {
-                width: 100%;
+                padding: 10px; /* Giảm padding cho trường nhập trên điện thoại */
             }
             h3 {
                 font-size: 1.5em; /* Kích thước tiêu đề nhỏ hơn trên điện thoại */
+            }
+            th, td {
+                padding: 10px; /* Giảm padding cho bảng trên điện thoại */
             }
         }
     </style>
